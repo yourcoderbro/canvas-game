@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Blocks Game</title>
+</head>
+<body>
+	<canvas id="gc" width="800" height="800"></canvas>
+	<script type="text/javascript">
+		var canvas = document.getElementById('gc')
+		var context = canvas.getContext('2d')
+		
+		var speed = 4
+		var fps = 24
+		var score = 0
+		var lives = 3
+		var gameOver = false
+
+		var blocks = []
+
+		var gameMusic = new Audio('game_music.wav')
+		var explosionAudio = new Audio('explosion.wav')
+		var lifeLostAudio = new Audio('life_lost.wav')
+
+		function startGame() {
+			gameMusic.currentTime = 0
+			gameMusic.volume = .12
+			gameMusic.play()
+			speed = 4
+			gameOver = false
+			score = 0
+			lives = 3
+			blocks = [
+				{
+					color: 'blue',
+					posX: 200,
+					posY: 250,
+					size: 40
+				},
+				{
+					color: 'green',
+					posX: 300,
+					posY: 250,
+					size: 40
+				},
+				{
+					color: 'pink',
+					posX: 400,
+					posY: 250,
+					size: 40
+				},
+				{
+					color: 'yellow',
+					posX: 500,
+					posY: 250,
+					size: 40
+				}
+			]
+		}
+
+		canvas.tabIndex = 1000
+
+		canvas.addEventListener('keydown', function(event) {
+			if (!gameOver) return
+			startGame()
+		})
+
+		canvas.addEventListener('mousedown', function(event) {
+			checkIfBlockDestroyed(getMousePosition(event))	
+		})
+
+		startGame()
+		setInterval(runGame, 1000 / fps)
+
+		function runGame() {
+
+			drawBackground()
+
+			if (gameOver) {
+				displayGameOver()
+				return
+			}
+			drawScore()
+			drawBlocks()
+
+		}
+
+		function drawScore() {
+			context.fillStyle = 'white'
+			context.fillText('Score: ' + score, 600, 50)
+			context.fillText('Lives: ' + lives, 500, 50)
+		}
+
+		function drawBackground(color) {
+			context.fillStyle = color ? color : 'black'
+			context.fillRect(0, 0, canvas.width, canvas.height)
+		}
+
+		function displayGameOver() {
+			context.fillStyle = 'red'
+			context.textAlign = 'center'
+			context.font = '60px Arial'
+			context.fillText('Game Over', canvas.width / 2, 300)
+
+			context.fillStyle = 'white'
+			context.font = '30px Arial'
+			context.fillText('Score: ' + score,(canvas.width / 2) , 350)
+
+			context.fillStyle = 'white'
+			context.font = '20px Arial'
+			context.fillText('Press any key to restart',
+				(canvas.width / 2) , 400)
+		}
+
+
+		function drawBlocks() {
+			for (var i = 0; i < blocks.length; i++) {
+				context.fillStyle = blocks[i].color
+				context.fillRect(blocks[i].posX, 
+					blocks[i].posY, 
+					blocks[i].size, 
+					blocks[i].size)
+
+				blocks[i].posY += speed
+				checkIfLifeLost(blocks[i])
+			}
+		}
+
+		function checkIfLifeLost(block) {
+			if (block.posY > canvas.height) {
+					block.posY = 0
+					lives -= 1
+					lifeLostAudio.volume = .12
+					lifeLostAudio.play()
+					if (lives <= 0) {
+						gameOver = true
+						gameMusic.pause()
+						lives = 0
+					}
+				}
+		}
+		function checkIfBlockDestroyed(mousePosition) {
+			for (var i = 0; i < blocks.length; i++) {
+				if (mousePosition.x >= blocks[i].posX && 
+					mousePosition.x <= blocks[i].posX + blocks[i].size &&
+					mousePosition.y >= blocks[i].posY &&
+					mousePosition.y <= blocks[i].posY + blocks[i].size
+				) {
+					blocks[i].posY = getRandomInt(-50, -400)
+					explosionAudio.volume = .12
+					explosionAudio.play()
+					explosionAudio.currentTime = 0
+					score += 1
+					speed += 0.5
+					drawBackground('white')
+				}
+			}
+		}
+
+
+		function getRandomInt(min, max) {
+			return Math.floor(Math.random() * (max - min + 1) ) + min
+		}
+
+		function getMousePosition(event) {
+			var rect = canvas.getBoundingClientRect() 
+			return {
+				x: event.clientX - rect.left,
+				y: event.clientY - rect.top
+			} 
+		}
+
+	</script>
+</body>
+</html>

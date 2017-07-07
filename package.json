@@ -1,0 +1,14 @@
+{
+	"name": "Blocks Game",
+	"version": "0.0.1",
+	"main": "game.html",
+	"window": {
+		"title": "Super Blocks",
+		"icon": "link.png",
+		"toolbar": true,
+		"frame": true,
+		"width": 830,
+		"height": 835,
+		"position": "center"
+	}
+}
